@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Public Key</title>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.34/dist/web3.min.js"></script>
+<script>
+  var address = "0xa9cD7ade65157aFa7456e030d6F7A82f7f028576"
+  var privateKey = "0x55fa6e754f01ebb4048018946a2f387cd772e493be25719b71ebf31791cc03d3"
+  var message = "Message to sign"
+  var web3 = new Web3();
+  var signature = web3.eth.accounts.sign(message, privateKey)
+  document.write(signature.signature);
+  const signingAddress = web3.eth.accounts.recover(message, signature.signature);
+  document.write("<br><br>");
+  if(address === signingAddress){
+    document.write("Firma verificata");
+  } else {
+    document.write("Firma NON verificata");
+  }
+</script>
+
+</body>
+</html>
