@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-contract DepostiWithdraw {
+contract DepositWithdraw {
     mapping(address => uint256) public balancesOf;
     
     function deposit() public payable {
