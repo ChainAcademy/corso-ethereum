@@ -9,11 +9,10 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
 
     <script type="text/javascript" src="tokenAbi.js"></script>
-    <script type="text/javascript" src="tokenSaleAbi.js"></script>
 
     <style media="screen">
       #metamaskAlert{display: none;}
-      #content{display: none;}
+      #content {display: none;}
     </style>
   </head>
   <body>
@@ -33,29 +32,75 @@
       <h1>
         DAPP
       </h1>
+      <div class="">
+        <button type="button" onclick="sendTx()" name="button" class="btn-lg btn-success" id="btn-send">Send Transaction</button>
+      </div>
 
     </div>
   </div>
 
   <script type="text/javascript">
-  $( document ).ready(function() {
-    if (typeof web3 === 'undefined') {
-      // Metamask not installed
-      $("#loading").hide()
-      $("#metamaskAlert").show()
-      $("#content").hide()
-    } else {
-      // Metamask installed
-      var tokenContract = web3.eth.contract(tokenAbi);
-      console.log('tokenContract', tokenContract);
+  const tokenSaleAddress = '0x50028fbaebcd2423387b0f1dbcd5dd79db80154a'
+  const tokenAddress = '0x0bccf4c40e83e417d1cd58bc891b74e21e59887e'
+  let firstAcc;
 
-      $("#loading").hide()
-      $("#metamaskAlert").hide()
-      $("#content").show()
+  const sendTx = function () {
+    console.log('web3.eth.accounts.wallet', web3.eth.accounts.wallet)
+    web3.eth.sendTransaction({
+      from: firstAcc,
+      to: tokenSaleAddress,
+      value: '1000000000000000000'
+    })
+  }
+  const doDapp = function (){
+    console.log('____doDapp');
+    // Metamask installed
+
+    $("#loading").hide()
+    $("#metamaskAlert").hide()
+    $("#content").show()
+
+    const tokenContract = new web3.eth.Contract(tokenAbi, tokenSaleAddress);
+    console.log('tokenContract', tokenContract);
+
+    web3.eth.getAccounts().then(function(e){
+      firstAcc=e[0]
+      console.log(firstAcc)
+    })
 
 
-    }
+    setInterval(function() {
+
+    }, 100)
+  }
+  window.addEventListener('load', async () => {
+      // Modern dapp browsers...
+      if (window.ethereum) {
+          window.web3 = new Web3(ethereum);
+          try {
+              // Request account access if needed
+              await ethereum.enable();
+              // Acccounts now exposed
+              doDapp()
+          } catch (error) {
+              // User denied account access...
+          }
+      }
+      // Legacy dapp browsers...
+      else if (window.web3) {
+          window.web3 = new Web3(web3.currentProvider);
+          // Acccounts always exposed
+          doDapp()
+      }
+      // Non-dapp browsers...
+      else {
+        $("#loading").hide()
+        $("#metamaskAlert").show()
+        $("#content").hide()
+      }
   });
+
+
   </script>
   </body>
 </html>
