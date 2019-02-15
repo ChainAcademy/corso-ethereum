@@ -121,5 +121,6 @@ contract Token is StandardToken {
         decimals = 18;
         totalSupply = 1000 * 1e18;
         balances[msg.sender] = totalSupply;
+        emit Transfer(address(0), msg.sender, totalSupply);
     }
 }
